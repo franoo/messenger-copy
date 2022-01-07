@@ -27,7 +27,7 @@ namespace WebApi.Controllers
         [HttpPost("authenticate")]
         public IActionResult Authenticate(UserLogin model)
         {
-            var response = _context.Users.SingleOrDefault(x => x.Username == model.UserName && x.PasswordHash == model.Password);//_userService.Authenticate(model);
+            var response = _context.Users.SingleOrDefault(x => x.username == model.UserName && x.PasswordHash == model.Password);//_userService.Authenticate(model);
             return Ok(response);
         }
         //
@@ -57,7 +57,7 @@ namespace WebApi.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> PutUser(int id, User user)
         {
-            if (id != user.Id)
+            if (id != user.id)
             {
                 return BadRequest();
             }
@@ -91,7 +91,7 @@ namespace WebApi.Controllers
             _context.Users.Add(user);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetUser", new { id = user.Id }, user);
+            return CreatedAtAction("GetUser", new { id = user.id }, user);
         }
 
         // DELETE: api/Users1/5
@@ -112,7 +112,7 @@ namespace WebApi.Controllers
 
         private bool UserExists(int id)
         {
-            return _context.Users.Any(e => e.Id == id);
+            return _context.Users.Any(e => e.id == id);
         }
     }
 }

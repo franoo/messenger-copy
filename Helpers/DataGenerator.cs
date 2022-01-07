@@ -22,18 +22,18 @@ namespace WebApi.Helpers
                 context.Users.AddRange(
                     new User
                     {
-                        Id = 1,
-                        FirstName = "Niuniek",
-                        LastName = "Teju",
-                        Username = "niuniek",
+                        id = 1,
+                        firstname = "Niuniek",
+                        lastname = "Teju",
+                        username = "niuniek",
                         PasswordHash = "2137"
                     },
                     new User
                     {
-                        Id = 2,
-                        FirstName = "Mysia",
-                        LastName = "Szynszyla",
-                        Username = "mysia",
+                        id = 2,
+                        firstname = "Mysia",
+                        lastname = "Szynszyla",
+                        username = "mysia",
                         PasswordHash = "2137"
                     }
                     );

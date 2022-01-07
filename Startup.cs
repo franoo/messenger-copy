@@ -98,7 +98,7 @@ namespace WebApi
             
             //app.UsePreflightRequestHandler();
             //
-            app.UseHttpsRedirection();
+            //app.UseHttpsRedirection();
             app.UseRouting();
             app.UseAuthentication();
             app.UseAuthorization();
