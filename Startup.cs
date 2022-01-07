@@ -40,9 +40,10 @@ namespace WebApi
             services.AddScoped<ITokenService, TokenService>();
             services.AddScoped<IUserService, UserService>();
 
-            services.AddCors(options => options.AddPolicy("CorsPolicy", builder =>//alow angular to log in
+            services.AddCors(options => 
+                options.AddPolicy("CorsPolicy", builder =>//alow angular to log in
             {
-                builder.AllowAnyMethod().AllowAnyHeader().WithOrigins("http://localhost:4200").AllowCredentials();
+                builder.WithOrigins("http://localhost:4200").AllowAnyMethod().AllowAnyHeader().AllowCredentials();
             }));
             //services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(options =>
             //{
@@ -93,12 +94,16 @@ namespace WebApi
                 app.UseDeveloperExceptionPage();
                             
             }
-
+            //CORS 
+            
+            //app.UsePreflightRequestHandler();
+            //
             app.UseHttpsRedirection();
             app.UseRouting();
             app.UseAuthentication();
             app.UseAuthorization();
             //app.UseMiddleware<JwtMiddleware>();
+            app.UseCors("CorsPolicy");
 
             app.UseEndpoints(endpoints =>
             {

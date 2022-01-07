@@ -30,8 +30,17 @@ namespace WebApi.Services
         }
         public UserDTO GetById(int id)
         {
-            var user = _context.Users.Find(id);
-            UserDTO userDTO = new UserDTO { Id = user.Id, Password = user.PasswordHash, Username = user.Username };
+            UserDTO userDTO = new UserDTO();
+            try
+            {
+                var user = _context.Users.Find(id);
+                userDTO = new UserDTO { Id = user.Id, Password = user.PasswordHash, Username = user.Username };
+               
+            }
+            catch
+            {
+
+            }
             return userDTO;
         }
 
