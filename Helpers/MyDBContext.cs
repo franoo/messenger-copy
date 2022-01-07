@@ -13,5 +13,6 @@ namespace WebApi.Helpers
 
         public DbSet<User> Users { get; set; }
         public DbSet<Message> Messages { get; set; }
+        //public DbSet<Conversation> Conversations { get; set; }
     }
 }

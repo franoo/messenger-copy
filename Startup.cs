@@ -39,6 +39,11 @@ namespace WebApi
             services.AddTransient<ITokenService, TokenService>();
             services.AddScoped<ITokenService, TokenService>();
             services.AddScoped<IUserService, UserService>();
+
+            services.AddCors(options => options.AddPolicy("CorsPolicy", builder =>//alow angular to log in
+            {
+                builder.AllowAnyMethod().AllowAnyHeader().WithOrigins("http://localhost:4200").AllowCredentials();
+            }));
             //services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(options =>
             //{
             //    options.TokenValidationParameters = new TokenValidationParameters
