@@ -15,6 +15,11 @@ using System.Text;
 using WebApi.Authentication;
 using WebApi.Services;
 using Microsoft.AspNetCore.Http;
+using WebApi.Hubs;
+using System.Threading.Tasks;
+using System;
+using Microsoft.AspNetCore.SignalR;
+using WebApi.Middleware;
 
 namespace WebApi
 {
@@ -61,6 +66,10 @@ namespace WebApi
             //        (Configuration["Jwt:Key"]))
             //    };
             //});
+            //signalR
+            services.AddSignalR();
+
+
             services.AddAuthentication(x =>
             {
                 x.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -82,7 +91,30 @@ namespace WebApi
                             (Encoding.UTF8.GetBytes
                             (Configuration["Jwt:Key"]))
                 };
+                //comment 
+                x.Events = new JwtBearerEvents
+                {
+                    OnMessageReceived = context =>
+                    {
+                        var accessToken = context.Request.Query["access_token"];
+
+                        // If the request is for our hub...
+                        var path = context.HttpContext.Request.Path;
+                        if (!string.IsNullOrEmpty(accessToken) && (path.StartsWithSegments("/chatsocket")))
+                        {
+                            // Read the token out of the query string
+
+                            ///looool token is empty in context
+                            ///
+                            context.Token = accessToken;
+                            //Console.WriteLine(context.Token);
+                        }
+                        return Task.CompletedTask;
+                    }
+                };
             });
+            //new shit
+            //services.AddSingleton<IUserIdProvider, UserIdProvider>();
 
         }
 
@@ -99,12 +131,23 @@ namespace WebApi
             //app.UsePreflightRequestHandler();
             //
             //app.UseHttpsRedirection();
+            
+            
+
             app.UseRouting();
+            app.UseWebSockets();
+            app.UseCors("CorsPolicy");
+            app.UseMiddleware<WebSocketsMiddleware>();
             app.UseAuthentication();
+
             app.UseAuthorization();
             //app.UseMiddleware<JwtMiddleware>();
-            app.UseCors("CorsPolicy");
 
+            app.UseEndpoints(endpoints =>
+            {
+                //signalR https://localhost:5000/chatsocket 
+                endpoints.MapHub<ChatHub>("/chatsocket");
+            });
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();

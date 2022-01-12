@@ -9,6 +9,7 @@ using WebApi.Helpers;
 using WebApi.Models;
 using WebApi.Authentication;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.Extensions.Configuration;
 
 namespace WebApi.Controllers
 {
@@ -18,17 +19,28 @@ namespace WebApi.Controllers
     public class UsersController : ControllerBase
     {
         private readonly MyDBContext _context;
+        private ITokenService _tokenService;
+        private readonly IConfiguration _config;
 
-        public UsersController(MyDBContext context)
+        public UsersController(MyDBContext context, ITokenService tokenService, IConfiguration config)
         {
             _context = context;
+            _tokenService = tokenService;
+            _config = config;
         }
 
         [HttpPost("authenticate")]
         public IActionResult Authenticate(UserLogin model)
         {
-            var response = _context.Users.SingleOrDefault(x => x.username == model.UserName && x.PasswordHash == model.Password);//_userService.Authenticate(model);
-            return Ok(response);
+            try
+            {
+                var response = _context.Users.SingleOrDefault(x => x.username == model.UserName && x.PasswordHash == model.Password);//_userService.Authenticate(model);
+                return Ok(response);
+            }
+            catch
+            {
+                return BadRequest();
+            }
         }
         //
         [HttpGet]
@@ -57,10 +69,14 @@ namespace WebApi.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> PutUser(int id, User user)
         {
+           // var token = HttpContext.Request.Headers["Authorization"].FirstOrDefault()?.Split(" ").Last();
+           // var userId = _tokenService.ValidateToken(_config["Jwt:Key"].ToString(), token);
             if (id != user.id)
             {
                 return BadRequest();
             }
+            var userDb = await _context.Users.FindAsync(id);
+            userDb.signalRconnectionId = user.signalRconnectionId;
 
             _context.Entry(user).State = EntityState.Modified;
 
@@ -92,6 +108,42 @@ namespace WebApi.Controllers
             await _context.SaveChangesAsync();
 
             return CreatedAtAction("GetUser", new { id = user.id }, user);
+        }
+
+
+        [HttpPost("updateConnectionId")]
+        public async Task<ActionResult<User>> UpdateConnectionId(string connectionId)
+        {
+            var token = HttpContext.Request.Headers["Authorization"].FirstOrDefault()?.Split(" ").Last();
+            var id = _tokenService.ValidateToken(_config["Jwt:Key"].ToString(), token);
+            if (id.HasValue)
+            {
+                var userDb = await _context.Users.FindAsync(id);
+                userDb.signalRconnectionId = connectionId;
+
+                _context.Entry(userDb).State = EntityState.Modified;
+                _context.Users.Add(userDb);
+                await _context.SaveChangesAsync();
+
+                try
+                {
+                    await _context.SaveChangesAsync();
+                }
+                catch (DbUpdateConcurrencyException)
+                {
+                    if (!UserExists(id.Value))
+                    {
+                        return NotFound();
+                    }
+                    else
+                    {
+                        throw;
+                    }
+                }
+
+                return NoContent();
+            }
+            return BadRequest();
         }
 
         // DELETE: api/Users1/5

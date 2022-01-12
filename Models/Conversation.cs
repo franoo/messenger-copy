@@ -10,12 +10,6 @@ namespace WebApi.Models
     {
         [Key]
         public int Id { get; set; }
-        public int SenderId { get; set; }
-        [Required]
-        public int ReceiverId { get; set; }
-        [Required]
-        public string MessageContent { get; set; }
-        [Required]
-        public DateTime Date { get; set; }
+        public List<Message> Messages { get; set; }
     }
 }

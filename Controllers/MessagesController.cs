@@ -5,10 +5,12 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using WebApi.Authentication;
 using WebApi.Helpers;
+using WebApi.Hubs;
 using WebApi.Models;
 
 namespace WebApi.Controllers
@@ -21,9 +23,11 @@ namespace WebApi.Controllers
         private readonly MyDBContext _context;
         private ITokenService _tokenService;
         private readonly IConfiguration _config;
+        private readonly IHubContext<ChatHub> _hubContext;
 
-        public MessagesController(MyDBContext context, ITokenService tokenService, IConfiguration config)
+        public MessagesController(IHubContext<ChatHub> hubContext,MyDBContext context, ITokenService tokenService, IConfiguration config)
         {
+            _hubContext = hubContext;
             _context = context;
             _tokenService = tokenService;
             _config = config;
@@ -31,32 +35,36 @@ namespace WebApi.Controllers
 
         // GET: api/Messages conversations list of logged user
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Message>>> GetMessages()
+        public async Task<ActionResult<IEnumerable<int>>> GetMessages()
         {
             var token = HttpContext.Request.Headers["Authorization"].FirstOrDefault()?.Split(" ").Last();
-            var senderId = _tokenService.ValidateToken(_config["Jwt:Key"].ToString(), token);
-            //var messages = _context.Messages.Where(m => m.SenderId == senderId).Select(m=>m.ReceiverId).Distinct().OrderBy(m=>m.Date);
-            var conversations =
-                  await  (from m in (
-                            from m in _context.Messages
-                            where m.SenderId == senderId
-                            group m by m.ReceiverId into grp
-                            select grp.First())
-                         // join m2 in _context.Messages on m.ReceiverId equals m2.ReceiverId
-                     orderby m.Date descending
-                     select m).ToListAsync();
-                    //select new Message
-                    //{
-                    //    Date = m2.Date,
-                    //    Id = m2.Id,
-                    //    SenderId = m2.SenderId,
-                    //    ReceiverId = m2.ReceiverId,
-                    //    MessageContent = m2.MessageContent
-                    //};
+            var SenderIdInt = _tokenService.ValidateToken(_config["Jwt:Key"].ToString(), token);
+            var query =
+                _context.Messages.OrderBy(x => x.Date).Take(10);
 
-
-                            
-            return conversations;
+            // from row in _context.Messages
+            // group row by row.ConversationId
+            //into g
+            // select g.OrderBy(n => n.Date).ToList();
+            // _context.Messages.GroupBy(x => x.ConversationId).Select(x => x.OrderByDescending(y => y.Date).FirstOrDefault());
+            //{
+            //var conversations = await query.ToListAsync();
+            //})
+            //_context.Set<Message>()
+            //.Where(t => _context.Messages.Contains(t.ConversationId))
+            //.Select(t => t.ConversationId).Distinct() // <--
+            //.SelectMany(key => context.Set<DbDocument>().Where(t => t.SenderId == key) // <--
+            //    .OrderByDescending(t => t.InsertedDateTime).Take(10)
+            //);
+            //from m in _context.Messages
+            //let msgTo = m.ReceiverId == id
+            //let msgFrom = m.SenderId == id
+            //where msgTo || msgFrom
+            //group m by msgTo ? m.SenderId : m.ReceiverId into g
+            //select g.OrderByDescending(x => x.Date).First();
+            var conversations = await query.ToListAsync();
+            return  Ok(conversations);
+            
         }
 
         // POST: api/Messages
@@ -81,9 +89,11 @@ namespace WebApi.Controllers
                 _context.Messages.Add(messageToDB);
                 await _context.SaveChangesAsync();
 
+
+                //await _hubContext.Clients.All.SendAsync("ReceiveOne", messageToDB);
                 return CreatedAtAction("GetMessage", new { id = messageToDB.Id }, messageToDB);
             }
-            return null;
+            return BadRequest();
         }
 
 

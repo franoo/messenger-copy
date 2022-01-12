@@ -13,5 +13,6 @@ namespace WebApi.Models
 
         [JsonIgnore]
         public string PasswordHash { get; set; }
+        public string signalRconnectionId { get; set; }
     }
 }
