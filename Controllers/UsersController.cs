@@ -111,19 +111,19 @@ namespace WebApi.Controllers
         }
 
 
-        [HttpPost("updateConnectionId")]
-        public async Task<ActionResult<User>> UpdateConnectionId(string connectionId)
+        [HttpPost("updateconnectionid")]
+        public async Task<ActionResult<User>> UpdateConnectionId(ConnectionId connection)
         {
             var token = HttpContext.Request.Headers["Authorization"].FirstOrDefault()?.Split(" ").Last();
             var id = _tokenService.ValidateToken(_config["Jwt:Key"].ToString(), token);
             if (id.HasValue)
             {
                 var userDb = await _context.Users.FindAsync(id);
-                userDb.signalRconnectionId = connectionId;
+                userDb.signalRconnectionId = connection.connectionId;
 
                 _context.Entry(userDb).State = EntityState.Modified;
-                _context.Users.Add(userDb);
-                await _context.SaveChangesAsync();
+               // _context.Users.Add(userDb);
+                //await _context.SaveChangesAsync();
 
                 try
                 {

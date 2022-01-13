@@ -74,8 +74,8 @@ namespace WebApi.Controllers
         {
             var token = HttpContext.Request.Headers["Authorization"].FirstOrDefault()?.Split(" ").Last();
             var senderId = _tokenService.ValidateToken(_config["Jwt:Key"].ToString(),token);
-            Console.WriteLine(token);
-            Console.WriteLine(senderId);
+            //Console.WriteLine(token);
+            //Console.WriteLine(senderId);
             if (senderId.HasValue)
             {
                 int id = senderId.Value;
@@ -89,8 +89,12 @@ namespace WebApi.Controllers
                 _context.Messages.Add(messageToDB);
                 await _context.SaveChangesAsync();
 
-
-                //await _hubContext.Clients.All.SendAsync("ReceiveOne", messageToDB);
+                var  userWithSignalConnectionId = await _context.Users.FindAsync(message.ReceiverId);
+                string conn = userWithSignalConnectionId.signalRconnectionId;
+                if (conn != null)
+                {
+                    await _hubContext.Clients.Client(conn).SendAsync("ReceiveOne", messageToDB.Id, messageToDB.SenderId, messageToDB.ReceiverId, messageToDB.MessageContent, messageToDB.Date);
+                }
                 return CreatedAtAction("GetMessage", new { id = messageToDB.Id }, messageToDB);
             }
             return BadRequest();

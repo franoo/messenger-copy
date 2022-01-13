@@ -56,7 +56,7 @@ namespace WebApi.Helpers
                         ReceiverId=2,
                         MessageContent="Witaj Mysiu",
                         Date = DateTime.Now.AddDays(-1),
-                        ConversationId=1
+                        //ConversationId=1
                     },
                     new Message
                     {
@@ -65,7 +65,7 @@ namespace WebApi.Helpers
                         ReceiverId=1,
                         MessageContent="Witaj Niunku",
                         Date = DateTime.Now,
-                        ConversationId=1
+                        //ConversationId=1
                     },
                     new Message
                     {
@@ -74,7 +74,7 @@ namespace WebApi.Helpers
                         ReceiverId=1,
                         MessageContent="Witaj Niunku, tu Ludwik",
                         Date = DateTime.Now.AddHours(5),
-                        ConversationId=2
+                        //ConversationId=2
                     }
                 });
                 //context.Conversations.AddRange(new Conversation[]

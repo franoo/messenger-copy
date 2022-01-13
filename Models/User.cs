@@ -15,4 +15,9 @@ namespace WebApi.Models
         public string PasswordHash { get; set; }
         public string signalRconnectionId { get; set; }
     }
+
+    public class ConnectionId
+    {
+        public string connectionId { get; set; }
+    }
 }

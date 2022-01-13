@@ -18,8 +18,8 @@ namespace WebApi.Models
         public string MessageContent { get; set; }
         [Required]
         public DateTime Date { get; set; }
-        [Required]
-        public int ConversationId{get;set;}
+       // [Required]
+        //public int ConversationId{get;set;}
        // public int ConversationId { get; set; }
     }
 }

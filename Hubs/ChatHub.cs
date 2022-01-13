@@ -28,10 +28,10 @@ namespace WebApi.Hubs
         {
             return Context.ConnectionId;
         }
-        public Task SendMessage(string receiverId, Message message)               // Two parameters accepted
-        {
-            return Clients.Client(receiverId).SendAsync("ReceiveOne", message);    // Note this 'ReceiveOne' 
-        }
+        //public Task SendMessage(string receiverId, string message)               // Two parameters accepted
+        //{
+        //    return Clients.Client(receiverId).SendAsync("ReceiveOne", message);    // Note this 'ReceiveOne' 
+        //}
         //public void saveConnectionId() { 
         //}
 
